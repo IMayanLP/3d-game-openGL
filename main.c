@@ -10,6 +10,8 @@
 
 enum Coords {X, Y, Z};
 
+//teste
+
 typedef struct {
     float x, y, z;
 } Vertice3D;
