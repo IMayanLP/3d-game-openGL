@@ -2,7 +2,33 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+#include <math.h>
 #include "inimigos.h"
+
+enemy randEnemy() {
+    float minX = -18.0f;
+    float maxX = 18.0f;
+
+    float minY = -8.0f;
+    float maxY = 18.0f;
+
+    float minZ = -20.0f;
+    float maxZ = -16.0f;
+
+    float x = minX + ((float)rand() / RAND_MAX) * (maxX - minX);
+    float y = minY + ((float)rand() / RAND_MAX) * (maxY - minY);
+    float z = minZ + ((float)rand() / RAND_MAX) * (maxZ - minZ);
+    float colorR = (float)rand() / RAND_MAX;
+    float colorG = (float)rand() / RAND_MAX;
+    float colorB = (float)rand() / RAND_MAX;
+
+    enemy e = { {x, y, z},
+                {colorR, colorG, colorB},
+                0.1f};
+
+    return e;
+}
 
 Enemy* createEnemy(enemy e) {
     Enemy* newEnemy = (Enemy*)malloc(sizeof(Enemy));

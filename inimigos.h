@@ -13,3 +13,4 @@ Enemy* createEnemy(enemy);
 Enemy* addEnemy(Enemy*, enemy);
 void printEnemies(Enemy*);
 void updateEnemies(Enemy**);
+enemy randEnemy();
