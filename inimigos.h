@@ -12,4 +12,4 @@ typedef struct Enemy {
 Enemy* createEnemy(enemy);
 Enemy* addEnemy(Enemy*, enemy);
 void printEnemies(Enemy*);
-void updateEnemies(Enemy*);
+void updateEnemies(Enemy**);

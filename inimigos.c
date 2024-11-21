@@ -55,14 +55,29 @@ void printEnemies(Enemy* head) {
     }
 }
 
-void updateEnemies(Enemy* head) {
-    if (!head) {
+void updateEnemies(Enemy** head) {
+    if (!head || !*head) {
         return;
     }
-    Enemy* temp = head;
-    while (temp) {        
-        temp->data.pos[2] = temp->data.pos[2] + temp->data.speed;
 
-        temp = temp->next;
+    Enemy* temp = *head;
+    Enemy* prev = NULL;
+
+    while (temp) {
+        if (temp->data.pos[2] >= 30) {
+            if (prev == NULL) {
+                *head = temp->next;
+            } else {
+                prev->next = temp->next;
+            }
+
+            Enemy* toDelete = temp;
+            temp = temp->next;
+            free(toDelete);
+        } else {
+            temp->data.pos[2] = temp->data.pos[2] + temp->data.speed;
+            prev = temp;
+            temp = temp->next;
+        }
     }
 }
