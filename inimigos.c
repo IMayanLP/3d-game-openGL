@@ -82,6 +82,10 @@ void printEnemies(Enemy* head) {
 }
 
 void updateEnemies(Enemy** head) {
+    float teste = ((float)rand() / RAND_MAX) * 1000;
+
+    if(teste > 995) addEnemy(*head, randEnemy());
+
     if (!head || !*head) {
         return;
     }
@@ -100,6 +104,8 @@ void updateEnemies(Enemy** head) {
             Enemy* toDelete = temp;
             temp = temp->next;
             free(toDelete);
+
+            addEnemy(*head, randEnemy());
         } else {
             temp->data.pos[2] = temp->data.pos[2] + temp->data.speed;
             prev = temp;
