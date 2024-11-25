@@ -1,0 +1,3 @@
+C:/Users/danil/Desktop/Projetos/3d-game-openGL/cmake-build-debug/CMakeFiles/3d_game_openGL.dir
+C:/Users/danil/Desktop/Projetos/3d-game-openGL/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/danil/Desktop/Projetos/3d-game-openGL/cmake-build-debug/CMakeFiles/rebuild_cache.dir

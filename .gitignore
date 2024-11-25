@@ -1,6 +1,7 @@
 .vscode/
 bin/
 obj/
+cmake-build-debug/
 
 *.cbp
 *.depend

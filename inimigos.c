@@ -24,6 +24,7 @@ enemy randEnemy() {
     float colorB = (float)rand() / RAND_MAX;
 
     enemy e = { {x, y, z},
+                2,
                 {colorR, colorG, colorB},
                 0.1f};
 
@@ -37,6 +38,7 @@ Enemy* createEnemy(enemy e) {
         exit(1);
     }
     newEnemy->data = e;
+    newEnemy->ativo = 1;
     newEnemy->next = NULL;
     return newEnemy;
 }
@@ -61,27 +63,27 @@ void printEnemies(Enemy* head) {
     Enemy* temp = head;
     while (temp) {
         enemy e = temp->data;
+        if (temp->ativo){
+            GLfloat ambient[] = { e.cor[0], e.cor[1], e.cor[2] };
+            GLfloat diffuse[] = { e.cor[0], e.cor[1], e.cor[2] };
+            GLfloat specular[] = { 0.1, 0.1, 0.1, 1.0 };
+            GLfloat shininess = 10.0;
 
-        GLfloat ambient[] = { e.cor[0], e.cor[1], e.cor[2] };
-        GLfloat diffuse[] = { e.cor[0], e.cor[1], e.cor[2] };
-        GLfloat specular[] = { 0.1, 0.1, 0.1, 1.0 };
-        GLfloat shininess = 10.0;
+            glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+            glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 
-        glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-        glMaterialf(GL_FRONT, GL_SHININESS, shininess);
-        
-        glPushMatrix(); // Salva a matriz de transformação atual
-        glTranslatef(e.pos[0], e.pos[1], e.pos[2]); // Move para a posição desejada
-        glutSolidSphere(2, 20, 20); // Desenha a esfera sólida
-        glPopMatrix(); // Restaura a matriz de transformação
-
+            glPushMatrix(); // Salva a matriz de transformação atual
+            glTranslatef(e.pos[0], e.pos[1], e.pos[2]); // Move para a posição desejada
+            glutSolidSphere(temp->data.raio, 20, 20); // Desenha a esfera sólida
+            glPopMatrix(); // Restaura a matriz de transformação
+        }
         temp = temp->next;
     }
 }
 
-void updateEnemies(Enemy** head) {
+void updateEnemies(Enemy** head, int* playerHealth) {
     float teste = ((float)rand() / RAND_MAX) * 1000;
 
     if(teste > 995) addEnemy(*head, randEnemy());
@@ -94,6 +96,18 @@ void updateEnemies(Enemy** head) {
     Enemy* prev = NULL;
 
     while (temp) {
+        if (!temp->ativo) {
+            if (prev == NULL) {
+                *head = temp->next;
+            } else {
+                prev->next = temp->next;
+            }
+
+            Enemy* toDelete = temp;
+            temp = temp->next;
+            free(toDelete);
+            addEnemy(*head, randEnemy());
+        }
         if (temp->data.pos[2] >= 30) {
             if (prev == NULL) {
                 *head = temp->next;
@@ -104,7 +118,7 @@ void updateEnemies(Enemy** head) {
             Enemy* toDelete = temp;
             temp = temp->next;
             free(toDelete);
-
+            *playerHealth -= 10;
             addEnemy(*head, randEnemy());
         } else {
             temp->data.pos[2] = temp->data.pos[2] + temp->data.speed;
@@ -113,3 +127,4 @@ void updateEnemies(Enemy** head) {
         }
     }
 }
+

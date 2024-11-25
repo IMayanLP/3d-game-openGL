@@ -15,6 +15,9 @@
 
 enum Coords {X, Y, Z};
 
+typedef enum { GAME_RUNNING, GAME_OVER } GameState;
+GameState gameState = GAME_RUNNING;
+
 typedef struct vertice {
     float x, y, z;
 } Vertice;
@@ -61,6 +64,9 @@ const int fireRating = 25;
 int actualFrame = 0;
 int shotAnim = 0;
 
+int playerHealth = 100;
+int playerScore = 0;
+
 Enemy* enemies;
 
 void initEnemies() {
@@ -71,9 +77,18 @@ void initEnemies() {
     }
 }
 
+void decreaseHealth(int damage) {
+    playerHealth -= damage;
+    if (playerHealth < 0) {
+        playerHealth = 0;
+        printf("Game Over!\n");
+    }
+}
+
 void loadObject(const char *nomeArquivo) {
     FILE *fp = fopen(nomeArquivo, "r");
     if (!fp) {
+        perror("Error");
         printf("Erro ao abrir o arquivo %s\n", nomeArquivo);
         exit(1);
     }
@@ -163,6 +178,14 @@ void initPlayer() {
     m.y = -1;
 }
 
+void renderBitmapString(float x, float y, void *font, const char *string) {
+    const char *c;
+    glRasterPos2f(x, y); // Posição para começar a desenhar os caracteres
+    for (c = string; *c != '\0'; c++) {
+        glutBitmapCharacter(font, *c); // Renderiza cada caractere
+    }
+}
+
 void renderText(GLfloat x, GLfloat y, char* text) {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -184,6 +207,121 @@ void renderText(GLfloat x, GLfloat y, char* text) {
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
+}
+
+void renderHealthBar() {
+    float healthPercentage = (float)playerHealth / 100.0f;
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    // Define posição e tamanho
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600);  // Adjust based on window size
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+
+    // Desenha o fundo da barra de vida
+    glColor3f(0.5f, 0.5f, 0.5f); // Fundo cinza
+    glBegin(GL_QUADS);
+    glVertex2f(50, 550);
+    glVertex2f(250, 550);
+    glVertex2f(250, 570);
+    glVertex2f(50, 570);
+    glEnd();
+
+
+    // Desenha a frente da barra de vida
+    glColor3f(1.0f - healthPercentage, healthPercentage, 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(50, 550);
+    glVertex2f(50 + 200 * healthPercentage, 550);
+    glVertex2f(50 + 200 * healthPercentage, 570);
+    glVertex2f(50, 570);
+    glEnd();
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+}
+
+void renderGameOverScreen() {
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Renderiza o fundo preto
+    glColor3f(0.0f, 0.0f, 0.0f); // background preto
+    glBegin(GL_QUADS);
+    glVertex2f(0, 0);
+    glVertex2f(800, 0);
+    glVertex2f(800, 600);
+    glVertex2f(0, 600);
+    glEnd();
+
+    // Renderiza o texto de "Game Over"
+    glColor3f(1.0f, 0.0f, 0.0f); // Cor vermelha para o texto
+    renderBitmapString(350, 300, GLUT_BITMAP_HELVETICA_18, "GAME OVER");
+
+    // Renderiza as instruções para reiniciar ou quitar
+    glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para as instruções
+    renderBitmapString(320, 250, GLUT_BITMAP_HELVETICA_12, "Aperte 'R' para Reiniciar");
+    renderBitmapString(320, 220, GLUT_BITMAP_HELVETICA_12, "Aperte 'Q' para Sair");
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+}
+
+void renderScore() {
+    glMatrixMode(GL_PROJECTION);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 0, 600);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para o texto
+    glRasterPos2f(700, 550);
+    char scoreText[20];
+    sprintf(scoreText, "Score: %d", playerScore);
+    for (char* c = scoreText; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    }
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
 }
 
 void initLighting() {
@@ -224,8 +362,7 @@ void setMaterialProperties(GLfloat ambient[], GLfloat diffuse[], GLfloat specula
     glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 }
 
-void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void renderGame(){
     glLoadIdentity();
 
     // Configurar a câmera
@@ -241,18 +378,18 @@ void display() {
 
     // Desenhar o chão
     glBegin(GL_QUADS);
-        glVertex3f(-20.0f, -10.0f, -20.0f);
-        glVertex3f(20.0f, -10.0f, -20.0f);
-        glVertex3f(20.0f, -10.0f, 100.0f);
-        glVertex3f(-20.0f, -10.0f, 100.0f);
+    glVertex3f(-20.0f, -10.0f, -20.0f);
+    glVertex3f(20.0f, -10.0f, -20.0f);
+    glVertex3f(20.0f, -10.0f, 100.0f);
+    glVertex3f(-20.0f, -10.0f, 100.0f);
     glEnd();
 
     // Desenhar o teto
     glBegin(GL_QUADS);
-        glVertex3f(-20.0f, 20.0f, -20.0f);
-        glVertex3f(20.0f, 20.0f, -20.0f);
-        glVertex3f(20.0f, 20.0f, 100.0f);
-        glVertex3f(-20.0f, 20.0f, 100.0f);
+    glVertex3f(-20.0f, 20.0f, -20.0f);
+    glVertex3f(20.0f, 20.0f, -20.0f);
+    glVertex3f(20.0f, 20.0f, 100.0f);
+    glVertex3f(-20.0f, 20.0f, 100.0f);
     glEnd();
 
     GLfloat ambient3[] = { 0.6, 0.2, 0.2, 1.0 };
@@ -262,26 +399,26 @@ void display() {
 
     // Desenhar parede frente
     glBegin(GL_QUADS);
-        glVertex3f(-20.0f, 20.0f, -20.0f);
-        glVertex3f(20.0f, 20.0f, -20.0f);
-        glVertex3f(20.0f, -10.0f, -20.0f);
-        glVertex3f(-20.0f, -10.0f, -20.0f);
+    glVertex3f(-20.0f, 20.0f, -20.0f);
+    glVertex3f(20.0f, 20.0f, -20.0f);
+    glVertex3f(20.0f, -10.0f, -20.0f);
+    glVertex3f(-20.0f, -10.0f, -20.0f);
     glEnd();
 
     // Desenhar parede esq
     glBegin(GL_QUADS);
-        glVertex3f(-20.0f, 20.0f, -20.0f);
-        glVertex3f(-20.0f, -10.0f, -20.0f);
-        glVertex3f(-20.0f, -10.0f, 100.0f);
-        glVertex3f(-20.0f, 20.0f, 100.0f);
+    glVertex3f(-20.0f, 20.0f, -20.0f);
+    glVertex3f(-20.0f, -10.0f, -20.0f);
+    glVertex3f(-20.0f, -10.0f, 100.0f);
+    glVertex3f(-20.0f, 20.0f, 100.0f);
     glEnd();
 
     // Desenhar parede dir
     glBegin(GL_QUADS);
-        glVertex3f(20.0f, 20.0f, -20.0f);
-        glVertex3f(20.0f, -10.0f, -20.0f);
-        glVertex3f(20.0f, -10.0f, 100.0f);
-        glVertex3f(20.0f, 20.0f, 100.0f);
+    glVertex3f(20.0f, 20.0f, -20.0f);
+    glVertex3f(20.0f, -10.0f, -20.0f);
+    glVertex3f(20.0f, -10.0f, 100.0f);
+    glVertex3f(20.0f, 20.0f, 100.0f);
     glEnd();
 
     printEnemies(enemies);
@@ -294,18 +431,70 @@ void display() {
 
     drawObject();
 
+    renderHealthBar();
+    renderScore();
     renderText(640.0f, 360.0f, "+");
 
     glFlush();
+
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (gameState == GAME_RUNNING) {
+        renderGame();
+    } else if (gameState == GAME_OVER) {
+        renderGameOverScreen();
+    }
     glutSwapBuffers();
 }
+
+int checkRaySphereIntersection(GLfloat rayOrigin[3], GLfloat rayDir[3], Enemy* sphere) {
+    GLfloat oc[3] = {rayOrigin[X] - sphere->data.pos[0], rayOrigin[Y] - sphere->data.pos[1], rayOrigin[Z] - sphere->data.pos[2]};
+    float a = rayDir[X] * rayDir[X] + rayDir[Y] * rayDir[Y] + rayDir[Z] * rayDir[Z];
+    float b = 2.0f * (oc[X] * rayDir[X] + oc[Y] * rayDir[Y] + oc[Z] * rayDir[Z]);
+    float c = oc[X] * oc[X] + oc[Y] * oc[Y] + oc[Z] * oc[Z] - sphere->data.raio * sphere->data.raio;;
+    float discriminant = b * b - 4 * a * c;
+
+    return (discriminant >= 0); // Verdadeiro se o tiro acerta a esfera
+}
+
+void detectAndDestroySpheres() {
+    GLfloat rayOrigin[3] = {p.position[X], p.position[Y], p.position[Z]};
+    GLfloat rayDir[3] = {
+            p.lookAt[X] - p.position[X],
+            p.lookAt[Y] - p.position[Y],
+            p.lookAt[Z] - p.position[Z]
+    };
+
+    // Normaliza a direção do tiro
+    float magnitude = sqrt(rayDir[X] * rayDir[X] + rayDir[Y] * rayDir[Y] + rayDir[Z] * rayDir[Z]);
+    rayDir[X] /= magnitude;
+    rayDir[Y] /= magnitude;
+    rayDir[Z] /= magnitude;
+
+    Enemy* current = enemies;
+    while (current) {
+        if (current->ativo && checkRaySphereIntersection(rayOrigin, rayDir, current)) {
+            current->ativo = 0; // Destroi a esfera
+            playerScore += 10;
+            printf("Sphere destroyed! Score: %d\n", playerScore);
+            printf("Sphere at (%f, %f, %f) destroyed!\n", current->data.pos[0], current->data.pos[1], current->data.pos[2]);
+        }
+        current = current->next;
+    }
+}
+
+
 
 void update(int value) {
     if(actualFrame < fireRating) {
         actualFrame++;
     } else if (actualFrame == fireRating) shotAnim = 0;
-
-    updateEnemies(&enemies);
+    if (playerHealth <= 0) {
+        gameState = GAME_OVER;
+    }
+    updateEnemies(&enemies, &playerHealth);
 
     glutPostRedisplay();
     glutTimerFunc(16, update, 0); // aproximadamente 60 FPS (1000ms/16ms = 62.5 updates por segundo)
@@ -327,8 +516,24 @@ void init() {
     initLighting();
 }
 
+void resetGame() {
+    playerHealth = 100;
+    playerScore = 0;
+    enemies = NULL;
+    initEnemies();
+
+}
 
 void keypress(int key, int x, int y) {
+    if (gameState == GAME_OVER) {
+        if (key == 'r') { // Restarta o jogo
+            resetGame();
+            gameState = GAME_RUNNING;
+        } else if (key == 'q') { // Sai do jogo
+            exit(0);
+        }
+    }
+
     switch (key) {
         case 27:
             if(showCursor) {
@@ -390,6 +595,7 @@ void mouseClick(int button, int state, int x, int y) {
             if(actualFrame == fireRating) {
                 actualFrame = 0;
                 shotAnim = 1;
+                detectAndDestroySpheres();
             }
             break;
         }
@@ -408,7 +614,7 @@ int main(int argc, char** argv) {
     initEnemies();
 
     glutSetCursor(GLUT_CURSOR_NONE);
-    loadObject("pistolinha.obj");
+    loadObject("C:\\Users\\danil\\Desktop\\Projetos\\3d-game-openGL\\pistolinha.obj");
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keypress);
