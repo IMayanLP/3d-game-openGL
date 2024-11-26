@@ -544,6 +544,16 @@ void keypress(int key, int x, int y) {
                 showCursor = 1;
             }
         break;
+        case ',':
+            if(p.sensibility > 0.2f) {
+                p.sensibility -= 0.1f;
+                printf("\nNew sens: %.4f", p.sensibility);
+            }
+            break;
+        case '.':
+            p.sensibility += 0.1f;
+            printf("\nNew sens: %.4f", p.sensibility);
+            break;
     }
 }
 
