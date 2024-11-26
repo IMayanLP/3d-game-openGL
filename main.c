@@ -114,7 +114,7 @@ void loadObject(const char *nomeArquivo) {
                            &face.v[1], &face.t[1], &face.n[1],
                            &face.v[2], &face.t[2], &face.n[2],
                            &face.v[3], &face.t[3], &face.n[3]);
-            // Ajuste para índices começando de zero
+
             for (int i = 0; i < 4; i++) {
                 face.v[i] = (face.v[i] > 0) ? face.v[i] - 1 : -1;
                 face.t[i] = (face.t[i] > 0) ? face.t[i] - 1 : -1;
@@ -329,7 +329,6 @@ void initLighting() {
     GLfloat globalAmbient[] = { 0.3f, 0.3f, 0.3f, 1.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
 
-    // Configuração da GL_LIGHT0
     GLfloat lightAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
     GLfloat lightDiffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
     GLfloat lightSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -344,12 +343,11 @@ void initLighting() {
     GLfloat pointLightSpecular[] = { 0.2f, 0.2f, 0.2f, 1.0f };
     GLfloat pointLightPosition[] = { 0.0f, 19.0f, 25.0f, 1.0f };
 
-    glLightfv(GL_LIGHT1, GL_AMBIENT, pointLightDiffuse);  // Propriedade ambiente
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, pointLightDiffuse);   // Propriedade difusa
-    glLightfv(GL_LIGHT1, GL_SPECULAR, pointLightSpecular); // Propriedade especular
-    glLightfv(GL_LIGHT1, GL_POSITION, pointLightPosition); // Posição da luz
+    glLightfv(GL_LIGHT1, GL_AMBIENT, pointLightDiffuse);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, pointLightDiffuse);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, pointLightSpecular);
+    glLightfv(GL_LIGHT1, GL_POSITION, pointLightPosition);
 
-    // Ativando a iluminação e GL_LIGHT0
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
@@ -501,15 +499,13 @@ void update(int value) {
 }
 
 void init() {
-    glClearColor(1.0, 1.0, 1.0, 1.0); // Cor de fundo
-    glEnable(GL_DEPTH_TEST); // Ativar teste de profundidade
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glEnable(GL_DEPTH_TEST);
 
-    // Configurar a proje��o
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0, (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT, 1.0, 100.0);
 
-    // Configurar a visualiza��o do modelo
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
