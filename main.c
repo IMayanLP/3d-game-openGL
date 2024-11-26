@@ -218,7 +218,7 @@ void renderHealthBar() {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    gluOrtho2D(0, 800, 0, 600);  // Adjust based on window size
+    gluOrtho2D(0, 800, 0, 600);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -355,7 +355,7 @@ void initLighting() {
     glEnable(GL_LIGHT1);
 }
 
-void setMaterialProperties(GLfloat ambient[], GLfloat diffuse[], GLfloat specular[], GLfloat shininess) {
+void setMaterial(GLfloat ambient[], GLfloat diffuse[], GLfloat specular[], GLfloat shininess) {
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
@@ -374,7 +374,7 @@ void renderGame(){
     GLfloat diffuse[] = { 0.2, 0.8, 0.2, 1.0 };
     GLfloat specular[] = { 0.1, 0.1, 0.1, 1.0 };
     GLfloat shininess = 10.0;
-    setMaterialProperties(ambient, diffuse, specular, shininess);
+    setMaterial(ambient, diffuse, specular, shininess);
 
     // Desenhar o chão
     glBegin(GL_QUADS);
@@ -395,7 +395,7 @@ void renderGame(){
     GLfloat ambient3[] = { 0.6, 0.2, 0.2, 1.0 };
     GLfloat diffuse3[] = { 0.6, 0.2, 0.2, 1.0 };
     GLfloat specular3[] = { 0.1, 0.1, 0.1, 1.0 };
-    setMaterialProperties(ambient3, diffuse3, specular3, shininess);
+    setMaterial(ambient3, diffuse3, specular3, shininess);
 
     // Desenhar parede frente
     glBegin(GL_QUADS);
@@ -427,7 +427,7 @@ void renderGame(){
     GLfloat diffuse2[] = { 0.2, 0.5, 0.8, 1.0 };
     GLfloat specular2[] = { 0.1, 0.1, 0.1, 1.0 };
     GLfloat shininess2 = 10.0;
-    setMaterialProperties(ambient, diffuse2, specular2, shininess2);
+    setMaterial(ambient, diffuse2, specular2, shininess2);
 
     drawObject();
 
@@ -614,7 +614,7 @@ int main(int argc, char** argv) {
     initEnemies();
 
     glutSetCursor(GLUT_CURSOR_NONE);
-    loadObject("C:\\Users\\danil\\Desktop\\Projetos\\3d-game-openGL\\pistolinha.obj");
+    loadObject("pistolinha.obj");
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keypress);

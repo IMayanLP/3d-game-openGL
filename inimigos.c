@@ -86,7 +86,7 @@ void printEnemies(Enemy* head) {
 void updateEnemies(Enemy** head, int* playerHealth) {
     float teste = ((float)rand() / RAND_MAX) * 1000;
 
-    if(teste > 995) addEnemy(*head, randEnemy());
+    if(teste > 998) addEnemy(*head, randEnemy());
 
     if (!head || !*head) {
         return;
@@ -107,8 +107,7 @@ void updateEnemies(Enemy** head, int* playerHealth) {
             temp = temp->next;
             free(toDelete);
             addEnemy(*head, randEnemy());
-        }
-        if (temp->data.pos[2] >= 30) {
+        } else if (temp->data.pos[2] >= 30) {
             if (prev == NULL) {
                 *head = temp->next;
             } else {
